@@ -93,7 +93,11 @@ export class Validator {
   /**
    * Performs validation of the given object based on validation schema.
    */
-  validateSyncIfPossible(schemaName: string, object: object, options?: ValidatorOptions): ValidationError[] | Promise<ValidationError[]>;
+  validateSyncIfPossible(
+    schemaName: string,
+    object: object,
+    options?: ValidatorOptions
+  ): ValidationError[] | Promise<ValidationError[]>;
   /**
    * Performs validation of the given object based on decorators or validation schema.
    */
@@ -111,8 +115,9 @@ export class Validator {
     const validationErrors: ValidationError[] = [];
     executor.execute(object, schema, validationErrors);
 
-    return executor.awaitingPromises.length === 0 ? executor.stripEmptyErrors(validationErrors) :
-    Promise.all(executor.awaitingPromises).then(() => executor.stripEmptyErrors(validationErrors));
+    return executor.awaitingPromises.length === 0
+      ? executor.stripEmptyErrors(validationErrors)
+      : Promise.all(executor.awaitingPromises).then(() => executor.stripEmptyErrors(validationErrors));
   }
 
   // -------------------------------------------------------------------------
