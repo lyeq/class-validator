@@ -85,6 +85,36 @@ export class Validator {
     return executor.stripEmptyErrors(validationErrors);
   }
 
+  /**
+   * Performs validation of the given object based on decorators used in given object class.
+   * NOTE: This method returns immediately if possible, otherwise returns a promise.
+   */
+  validateSyncIfPossible(object: object, options?: ValidatorOptions): ValidationError[] | Promise<ValidationError[]>;
+  /**
+   * Performs validation of the given object based on validation schema.
+   */
+  validateSyncIfPossible(schemaName: string, object: object, options?: ValidatorOptions): ValidationError[] | Promise<ValidationError[]>;
+  /**
+   * Performs validation of the given object based on decorators or validation schema.
+   */
+  validateSyncIfPossible(
+    objectOrSchemaName: object | string,
+    objectOrValidationOptions: object | ValidationOptions,
+    maybeValidatorOptions?: ValidatorOptions
+  ): ValidationError[] | Promise<ValidationError[]> {
+    const object = typeof objectOrSchemaName === 'string' ? (objectOrValidationOptions as object) : objectOrSchemaName;
+    const options =
+      typeof objectOrSchemaName === 'string' ? maybeValidatorOptions : (objectOrValidationOptions as ValidationOptions);
+    const schema = typeof objectOrSchemaName === 'string' ? objectOrSchemaName : undefined;
+
+    const executor = new ValidationExecutor(this, options);
+    const validationErrors: ValidationError[] = [];
+    executor.execute(object, schema, validationErrors);
+
+    return executor.awaitingPromises.length === 0 ? executor.stripEmptyErrors(validationErrors) :
+    Promise.all(executor.awaitingPromises).then(() => executor.stripEmptyErrors(validationErrors));
+  }
+
   // -------------------------------------------------------------------------
   // Private Properties
   // -------------------------------------------------------------------------
